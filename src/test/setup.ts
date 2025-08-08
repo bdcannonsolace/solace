@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { sql as dsql } from 'drizzle-orm';
+import { beforeAll, afterAll, beforeEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -22,7 +23,7 @@ beforeAll(async () => {
 
   sql = postgres(url, { max: 1 });
   db = drizzle(sql);
-  
+
   const migrationsDir = path.resolve(process.cwd(), 'drizzle');
   if (fs.existsSync(migrationsDir)) {
     await migrate(db, { migrationsFolder: migrationsDir });

@@ -1,15 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { advocates } from '../../../db/schema';
+import { getTestDb } from '../../../test/db';
 
 // We import GET after the setup has run so the app db can point to the test db
 import { GET } from './route';
 
-// Access the db initialized in setup
-const getDb = () => {
-  const g = global as any;
-  if (!g.__TEST_DB__?.db) throw new Error('Test DB not initialized');
-  return g.__TEST_DB__.db as import('drizzle-orm/postgres-js').PostgresJsDatabase;
-};
 
 describe('GET /api/advocates (integration)', () => {
   it('returns empty list when no rows', async () => {
@@ -20,7 +15,8 @@ describe('GET /api/advocates (integration)', () => {
   });
 
   it('returns inserted advocates from real DB', async () => {
-    const db = getDb();
+    const db = getTestDb();
+    
     await db.insert(advocates).values({
       firstName: 'Ada',
       lastName: 'Lovelace',
