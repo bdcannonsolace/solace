@@ -9,7 +9,10 @@
     "lint": "next lint",
     "generate": "drizzle-kit generate",
     "migrate:up": "node ./src/db/migrate.js",
-    "seed": "tsx ./src/db/seed/index.ts"
+    "seed": "tsx ./src/db/seed/index.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "drizzle-orm": "^0.32.1",
@@ -22,6 +25,7 @@
     "@types/node": "^20.14.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "dotenv": "^17.2.1",
     "drizzle-kit": "^0.23.0",
     "eslint": "^8.57.0",
@@ -29,6 +33,7 @@
     "postcss": "^8.4.40",
     "tailwindcss": "^3.4.7",
     "tsx": "^4.20.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^3.2.4"
   }
 }
