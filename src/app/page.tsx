@@ -30,9 +30,8 @@ export default function Home() {
         advocate.lastName.includes(searchTerm) ||
         advocate.city.includes(searchTerm) ||
         advocate.degree.includes(searchTerm) ||
-        advocate.specialties.join(" ").includes(searchTerm)
-        // Revisit this
-        // advocate.yearsOfExperience.includes(searchTerm)
+        advocate.specialties.join(" ").includes(searchTerm) ||
+        advocate.yearsOfExperience.toString() === searchTerm
       );
     });
 
