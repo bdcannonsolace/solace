@@ -39,3 +39,20 @@ npx drizzle-kit push
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
+
+
+## Planned Changes
++ Improve GET /advocates
+  - Improve querying advocates with the current querying pattern
+    - Add indices for the fields we're making queryable
+  - Add paging to the endpoint
+    - Fine for now but as the number of advocates grow you don't want to fetch all everytime
+  - Add Unit tests for the endpoint to make sure its behaving as expected
++ Improve UI
+  - At the momemnt this is just a clunky text with not formatting or style
+  - Improve filtering UI
++ Improve Backend Internals
+  - Add some service or class responsible for returning Advocate Data
+  - Add unit tests
++ Improve Frontend internals
+  - Create something like a useAdvocates to consolidate bits for fetching and displaying advocate data
