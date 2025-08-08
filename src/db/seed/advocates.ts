@@ -175,4 +175,8 @@ const advocateData = [
   },
 ];
 
-export { advocateData };
+const seedAdvocates = async () => {
+  await db.insert(advocates).values(advocateData);
+};
+
+export { advocateData, seedAdvocates };
