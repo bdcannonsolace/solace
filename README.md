@@ -53,6 +53,6 @@ curl -X POST http://localhost:3000/api/seed
   - Improve filtering UI
 + Improve Backend Internals
   - Add some service or class responsible for returning Advocate Data
-  - Add unit tests
+  - ~~Add unit tests~~
 + Improve Frontend internals
   - Create something like a useAdvocates to consolidate bits for fetching and displaying advocate data
