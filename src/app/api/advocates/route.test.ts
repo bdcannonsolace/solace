@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { advocates } from '../../../db/schema';
-import { getTestDb } from '../../../test/db';
+import db from '../../../db';
 
 // We import GET after the setup has run so the app db can point to the test db
 import { GET } from './route';
@@ -15,8 +15,6 @@ describe('GET /api/advocates (integration)', () => {
   });
 
   it('returns inserted advocates from real DB', async () => {
-    const db = getTestDb();
-    
     await db.insert(advocates).values({
       firstName: 'Ada',
       lastName: 'Lovelace',
@@ -39,6 +37,7 @@ describe('GET /api/advocates (integration)', () => {
 
     const res = await GET();
     expect(res.status).toBe(200);
+    
     const body = await res.json();
     expect(Array.isArray(body.data)).toBe(true);
     expect(body.data).toHaveLength(2);

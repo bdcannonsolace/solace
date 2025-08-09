@@ -1,39 +1,31 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+require('dotenv').config({path: path.resolve(process.cwd(), '/.env.test')});
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { sql as dsql } from 'drizzle-orm';
 import { beforeAll, afterAll, beforeEach } from 'vitest';
-import fs from 'node:fs';
 import path from 'node:path';
-
-let sql: ReturnType<typeof postgres> | null = null;
-let db: ReturnType<typeof drizzle> | null = null;
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __TEST_DB__: {
-    sql: ReturnType<typeof postgres> | null;
-    db: ReturnType<typeof drizzle> | null;
-  } | undefined;
-}
+import db from '../db';
 
 beforeAll(async () => {
-  const url = process.env.DATABASE_URL_TEST ?? process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_URL_TEST or DATABASE_URL must be set for tests');
-
-  sql = postgres(url, { max: 1 });
-  db = drizzle(sql);
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL must be set for tests in test.env');
 
   const migrationsDir = path.resolve(process.cwd(), 'drizzle');
-  if (fs.existsSync(migrationsDir)) {
+
+  try {
+    // Run the migrations
     await migrate(db, { migrationsFolder: migrationsDir });
+  } catch (err: any) {
+    if (err?.code === 'ENOENT' || /migrations folder/i.test(String(err?.message))) {
+      // If no migrations folder exists, continue without failing tests
+      // eslint-disable-next-line no-console
+      console.warn(`[tests] Migrations folder not found at ${migrationsDir}, skipping migrations.`);
+    } else {
+      throw err;
+    }
   }
-  global.__TEST_DB__ = { sql, db };
 });
 
 afterAll(async () => {
-  if (sql) await sql.end();
-  global.__TEST_DB__ = undefined;
 });
 
 beforeEach(async () => {
