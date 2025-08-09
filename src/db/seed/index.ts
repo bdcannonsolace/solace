@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { seedAdvocates } from "./advocates";
 
 const main = async () => {
