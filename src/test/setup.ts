@@ -39,7 +39,7 @@ afterAll(async () => {
 
 beforeEach(async (ctx) => {
   const savepoint = generateSavepointName(ctx);
-  
+
   await db.execute(dsql.raw(`SAVEPOINT ${savepoint}`));
 });
 
@@ -56,7 +56,6 @@ export {}; // ensure this is treated as a module
 function generateSavepointName(ctx: any): string {
   const task = ctx?.task;
   const base = `${task?.file?.name ?? 'nofile'}:${task?.name ?? 'notask'}`;
-  console.log(`Base: ${base}`);
   const hash = sha256Hash(base).toString().slice(0, 10);
 
   return `sp_${hash}`;
