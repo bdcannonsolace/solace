@@ -131,7 +131,6 @@ describe('GET /api/advocates', () => {
       const body = await res.json();
 
       expect(body.data).toHaveLength(50);
-      console.log(body.data);
       expect(body.data[0]).toMatchObject({ firstName: 'First1' });
       expect(body.data[49]).toMatchObject({ firstName: 'First50' });
     });

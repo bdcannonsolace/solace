@@ -46,8 +46,6 @@ beforeEach(async (ctx) => {
 afterEach(async (ctx) => {
   const savepoint = generateSavepointName(ctx);
   await db.execute(dsql.raw(`ROLLBACK TO SAVEPOINT ${savepoint}`));
-
-  // Release the savepoint name
   await db.execute(dsql.raw(`RELEASE SAVEPOINT ${savepoint}`));
 });
 
