@@ -1,8 +1,10 @@
-require('dotenv').config({path: path.resolve(process.cwd(), '/.env.test')});
+import path from 'node:path';
+import { createHash } from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { sql as dsql } from 'drizzle-orm';
-import { beforeAll, afterAll, beforeEach } from 'vitest';
-import path from 'node:path';
+import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import db from '../db';
 
 beforeAll(async () => {
@@ -23,17 +25,45 @@ beforeAll(async () => {
       throw err;
     }
   }
-});
 
-afterAll(async () => {
-});
-
-beforeEach(async () => {
-  if (!db) return;
-  // Truncate all test tables you need to reset. For now, just advocates
+  // Start an outer transaction that will wrap all tests
+  await db.execute(dsql`BEGIN`);
+  // Ensure a clean base state once; per-test isolation is via savepoints
   await db.execute(dsql`TRUNCATE TABLE advocates RESTART IDENTITY CASCADE`);
 });
 
+afterAll(async () => {
+  // Roll back everything done during the test suite
+  await db.execute(dsql`ROLLBACK`);
+});
+
+beforeEach(async (ctx) => {
+  const savepoint = generateSavepointName(ctx);
+  
+  await db.execute(dsql.raw(`SAVEPOINT ${savepoint}`));
+});
+
+afterEach(async (ctx) => {
+  const savepoint = generateSavepointName(ctx);
+  await db.execute(dsql.raw(`ROLLBACK TO SAVEPOINT ${savepoint}`));
+
+  // Release the savepoint name
+  await db.execute(dsql.raw(`RELEASE SAVEPOINT ${savepoint}`));
+});
+
 export {}; // ensure this is treated as a module
+
+function generateSavepointName(ctx: any): string {
+  const task = ctx?.task;
+  const base = `${task?.file?.name ?? 'nofile'}:${task?.name ?? 'notask'}`;
+  console.log(`Base: ${base}`);
+  const hash = sha256Hash(base).toString().slice(0, 10);
+
+  return `sp_${hash}`;
+}
+
+function sha256Hash(str: string): string {
+  return createHash('sha256').update(str).digest('hex');
+}
 
 
