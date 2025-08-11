@@ -143,19 +143,23 @@ describe('GET /api/advocates', () => {
 
       const resB = await GET(new Request('http://localhost/api/advocates?firstName=Zed&city=City'));
       const bodyB = await resB.json();
+
       expect(bodyB.data).toHaveLength(0);
     });
 
-    it('filters by specialties (any match) and yearsOfExperience range', async () => {
+    it.only('filters by specialties (any match) and yearsOfExperience range', async () => {
       await db.insert(advocates).values([
-        { firstName: 'SpecA', lastName: 'A', city: 'X', degree: 'MD', specialties: ['cardio'], yearsOfExperience: 6, phoneNumber: 1111111112 },
+        { firstName: 'SpecA', lastName: 'A', city: 'X', degree: 'MD', specialties: ['cardio', 'dermatology'], yearsOfExperience: 4, phoneNumber: 1111111112 },
         { firstName: 'SpecB', lastName: 'B', city: 'X', degree: 'MD', specialties: ['peds'], yearsOfExperience: 4, phoneNumber: 1111111113 },
+        { firstName: 'SpecC', lastName: 'C', city: 'X', degree: 'MD', specialties: ['cardio'], yearsOfExperience: 4, phoneNumber: 1111111114 },
       ]);
 
-      const res = await GET(new Request('http://localhost/api/advocates?specialties=cardio,neuro&yearsOfExperience=5-10'));
+      const res = await GET(new Request('http://localhost/api/advocates?specialties=cardio,neuro&minYearsOfExperience=4'));
       const body = await res.json();
-      expect(body.data).toHaveLength(1);
+
+      expect(body.data).toHaveLength(2);
       expect(body.data[0]).toMatchObject({ firstName: 'SpecA' });
+      expect(body.data[1]).toMatchObject({ firstName: 'SpecC' });
     });
   });
 });

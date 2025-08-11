@@ -1,4 +1,4 @@
-import type { ListAdvocateFilters } from './service';
+import type { ListAdvocateFilters } from './types';
 import { z } from 'zod';
 
 export function trimToOptionalString(input: unknown): string | undefined {
@@ -22,6 +22,7 @@ export function csvOrArrayToStringArray(input: unknown): string[] | undefined {
 
 export function parseIntOrUndefined(input: unknown): number | undefined {
   if (input == null) return undefined;
+  
   const n = Number(input);
   return Number.isFinite(n) ? n : undefined;
 }

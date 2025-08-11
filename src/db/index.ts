@@ -1,4 +1,4 @@
-require('dotenv').config({path: process.cwd() + '/.env.test'});
+require('dotenv').config({path: process.cwd() + '/.env'});
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -12,7 +12,7 @@ const setup = (): PostgresJsDatabase => {
   const url = process.env.DATABASE_URL;
   
   const queryClient = postgres(url, { max: 1 });
-  const db = drizzle(queryClient);
+  const db = drizzle(queryClient, { logger: true });
 
   return db;
 };
