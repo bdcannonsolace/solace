@@ -2,30 +2,12 @@ import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { count } from 'drizzle-orm';
 import { advocates } from '../../../db/schema';
 import db from '../../../db';
+import { insertAdvocates, makeAdvocate } from '../../../test/factories/advocates';
 
 type Advocate = typeof advocates.$inferSelect;
 
 // We import GET after the setup has run so the app db can point to the test db
 import { GET } from './route';
-
-function makeAdvocate(n: number) {
-  return {
-    firstName: `First${n}`,
-    lastName: `Last${n}`,
-    city: 'City',
-    degree: 'Degree',
-    specialties: ['one'],
-    yearsOfExperience: 1 + (n % 30),
-    phoneNumber: 1000000000 + n,
-  };
-}
-
-const insertAdvocates = async (count: number): Promise<Advocate[]> => {
-  const rows = Array.from({ length: count }, (_, i) => makeAdvocate(i + 1));
-  const insertedAdvocates = await db.insert(advocates).values(rows).returning();
-
-  return insertedAdvocates;
-};
 
 describe('GET /api/advocates', () => {
   describe('return advocates', () => {
