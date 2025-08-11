@@ -8,6 +8,13 @@
       "when": 1754778558480,
       "tag": "0000_initial-migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754945292087,
+      "tag": "0001_add_indexes_to_advocate",
+      "breakpoints": true
     }
   ]
 }
