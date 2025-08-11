@@ -1,49 +1,116 @@
-import { describe, it, expect } from 'vitest';
-import { advocates } from '../../../db/schema';
-import db from '../../../db';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { insertAdvocates } from '../../../test/factories/advocates';
 
 // We import GET after the setup has run so the app db can point to the test db
 import { GET } from './route';
 
+describe('GET /api/advocates', () => {
+  describe('return advocates', () => {
+    it('returns an empty list there are no records', async () => {
+      const res = await GET(new Request('http://localhost/api/advocates'));
+      const body = await res.json();
 
-describe('GET /api/advocates (integration)', () => {
-  it('returns empty list when no rows', async () => {
-    const res = await GET();
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual({ data: [] });
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ data: [] });
+    });
+
+    it('returns advocates when there are records', async () => {
+      const advocates = await insertAdvocates(2);
+
+      const res = await GET(new Request('http://localhost/api/advocates'));
+      expect(res.status).toBe(200);
+      
+      const body = await res.json();
+
+      expect(Array.isArray(body.data)).toBe(true);
+      expect(body.data).toHaveLength(2);
+      expect(body.data[0]).toMatchObject({ firstName: advocates[0].firstName, lastName: advocates[0].lastName });
+      expect(body.data[1]).toMatchObject({ firstName: advocates[1].firstName, lastName: advocates[1].lastName });
+    });
   });
 
-  it('returns inserted advocates from real DB', async () => {
-    await db.insert(advocates).values({
-      firstName: 'Ada',
-      lastName: 'Lovelace',
-      city: 'London',
-      degree: 'Mathematics',
-      specialties: ['algorithms'],
-      yearsOfExperience: 10,
-      phoneNumber: 1111111111,
+  describe('when using pagination', () => {
+    beforeEach(async () => {
+      // At the moment a default page size is 10
+      await insertAdvocates(65);
     });
 
-    await db.insert(advocates).values({
-      firstName: 'Grace',
-      lastName: 'Hopper',
-      city: 'New York',
-      degree: 'Mathematics',
-      specialties: ['compilers'],
-      yearsOfExperience: 15,
-      phoneNumber: 2222222222,
+    it('uses defaults when no query params: returns first 10 ordered by id asc', async () => {
+      const res = await GET(new Request('http://localhost/api/advocates'));
+      const body = await res.json();
+
+      expect(body.data).toHaveLength(10);
+      expect(body.data[0]).toMatchObject({ firstName: 'First1', lastName: 'Last1' });
+      expect(body.data[9]).toMatchObject({ firstName: 'First10', lastName: 'Last10' });
     });
 
-    const res = await GET();
-    expect(res.status).toBe(200);
-    
-    const body = await res.json();
-    expect(Array.isArray(body.data)).toBe(true);
-    expect(body.data).toHaveLength(2);
-    expect(body.data[0]).toMatchObject({ firstName: 'Ada', lastName: 'Lovelace' });
-    expect(body.data[1]).toMatchObject({ firstName: 'Grace', lastName: 'Hopper' });
+  
+    it('can set pageSize', async () => {
+      const res = await GET(new Request('http://localhost/api/advocates?pageSize=10'));
+      const body = await res.json();
+
+      expect(body.data).toHaveLength(10);
+      expect(body.data[0]).toMatchObject({ firstName: 'First1' });
+      expect(body.data[4]).toMatchObject({ firstName: 'First5' });
+      expect(body.data[9]).toMatchObject({ firstName: 'First10' });
+    });
+  
+    it('can set page and pageSize independently', async () => {
+      const res = await GET(new Request('http://localhost/api/advocates?page=3&pageSize=5'));
+      const body = await res.json();
+
+      expect(body.data).toHaveLength(5);
+      expect(body.data[0]).toMatchObject({ firstName: 'First11' });
+      expect(body.data[4]).toMatchObject({ firstName: 'First15' });
+    });
+  
+    it('falls back to defaults when page is invalid (0, negative, non-numeric)', async () => {
+      const invalidPages = [
+        '0',
+        '-3',
+        'abc',
+      ];
+  
+      for (const page of invalidPages) {
+        const res = await GET(new Request(`http://localhost/api/advocates?page=${page}&pageSize=5`));
+        const body = await res.json();
+
+        expect(body.data).toHaveLength(5);
+        expect(body.data[0]).toMatchObject({ firstName: 'First1' });
+      }
+    });
+  
+    it('falls back to default pageSize when pageSize is invalid (0, negative, non-numeric)', async () => {
+      const invalidPageSizes = [
+        '0',
+        '-10',
+        'abc',
+      ];
+  
+      for (const pageSize of invalidPageSizes) {
+        const res = await GET(new Request(`http://localhost/api/advocates?pageSize=${pageSize}`));
+        const body = await res.json();
+
+        expect(body.data).toHaveLength(10);
+        expect(body.data[0]).toMatchObject({ firstName: 'First1' });
+      }
+    });
+  
+    it('returns an empty array when when it has been paged out of range', async () => {
+      const res = await GET(new Request('http://localhost/api/advocates?page=6&pageSize=20'));
+      const body = await res.json();
+
+      expect(body.data).toHaveLength(0);
+    });
+  
+    it('returns the default max records when the set page size is greater than the max records', async () => {
+      const res = await GET(new Request('http://localhost/api/advocates?pageSize=100'));
+      const body = await res.json();
+
+      expect(body.data).toHaveLength(50);
+      expect(body.data[0]).toMatchObject({ firstName: 'First1' });
+      expect(body.data[49]).toMatchObject({ firstName: 'First50' });
+    });
   });
 });
-
 
