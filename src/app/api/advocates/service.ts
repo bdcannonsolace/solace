@@ -16,7 +16,7 @@ export async function listAdvocates(
   let baseQuery = dbLike
     .select()
     .from(advocates)
-    .orderBy(asc(advocates.firstName), asc(advocates.lastName))
+    .orderBy(asc(advocates.id))
     .$dynamic();
 
   const conditions = buildAllConditions(filters);
