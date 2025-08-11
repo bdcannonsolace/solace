@@ -147,7 +147,7 @@ describe('GET /api/advocates', () => {
       expect(bodyB.data).toHaveLength(0);
     });
 
-    it.only('filters by specialties (any match) and yearsOfExperience range', async () => {
+    it('filters by specialties (any match) and yearsOfExperience range', async () => {
       await db.insert(advocates).values([
         { firstName: 'SpecA', lastName: 'A', city: 'X', degree: 'MD', specialties: ['cardio', 'dermatology'], yearsOfExperience: 4, phoneNumber: 1111111112 },
         { firstName: 'SpecB', lastName: 'B', city: 'X', degree: 'MD', specialties: ['peds'], yearsOfExperience: 4, phoneNumber: 1111111113 },
