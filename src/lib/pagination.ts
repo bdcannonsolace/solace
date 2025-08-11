@@ -1,3 +1,5 @@
+import { PgSelect } from "drizzle-orm/pg-core";
+
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
@@ -25,14 +27,11 @@ export function getPaginationParams(request?: Request) {
     pageSize = MAX_PAGE_SIZE;
   }
 
-  // This offset is going to be used in the db query to page
-  // to the correct records
-  const offset = (page - 1) * pageSize;
-
-  return { page, pageSize, offset };
+  return { page, pageSize };
 }
 
-export function withPagination<T extends { limit: (n: number) => any; offset: (n: number) => any }>(
+// https://orm.drizzle.team/docs/dynamic-query-building
+export function withPagination<T extends PgSelect >(
   qb: T,
   page: number = 1,
   pageSize: number = DEFAULT_PAGE_SIZE,

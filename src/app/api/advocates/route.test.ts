@@ -1,10 +1,5 @@
-import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
-import { count } from 'drizzle-orm';
-import { advocates } from '../../../db/schema';
-import db from '../../../db';
-import { insertAdvocates, makeAdvocate } from '../../../test/factories/advocates';
-
-type Advocate = typeof advocates.$inferSelect;
+import { describe, it, expect, beforeEach } from 'vitest';
+import { insertAdvocates } from '../../../test/factories/advocates';
 
 // We import GET after the setup has run so the app db can point to the test db
 import { GET } from './route';
@@ -12,7 +7,7 @@ import { GET } from './route';
 describe('GET /api/advocates', () => {
   describe('return advocates', () => {
     it('returns an empty list there are no records', async () => {
-      const res = await GET();
+      const res = await GET(new Request('http://localhost/api/advocates'));
       const body = await res.json();
 
       expect(res.status).toBe(200);
@@ -22,7 +17,7 @@ describe('GET /api/advocates', () => {
     it('returns advocates when there are records', async () => {
       const advocates = await insertAdvocates(2);
 
-      const res = await GET();
+      const res = await GET(new Request('http://localhost/api/advocates'));
       expect(res.status).toBe(200);
       
       const body = await res.json();
@@ -41,7 +36,7 @@ describe('GET /api/advocates', () => {
     });
 
     it('uses defaults when no query params: returns first 10 ordered by id asc', async () => {
-      const res = await GET();
+      const res = await GET(new Request('http://localhost/api/advocates'));
       const body = await res.json();
 
       expect(body.data).toHaveLength(10);

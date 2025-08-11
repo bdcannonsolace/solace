@@ -11,12 +11,13 @@ export async function listAdvocates(
   dbLike: PostgresJsDatabase = appDb,
 ) {
   const query = withPagination(
-    dbLike.select().from(advocates).orderBy(asc(advocates.id)),
+    dbLike.select().from(advocates).orderBy(asc(advocates.id)).$dynamic(),
     page,
     pageSize,
   );
 
   const rows = await query;
+  
   return rows;
 }
 
