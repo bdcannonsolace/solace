@@ -1,7 +1,5 @@
 import path from 'node:path';
 import { createHash } from 'crypto';
-import dotenv from 'dotenv';
-dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { sql as dsql } from 'drizzle-orm';
 import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest';

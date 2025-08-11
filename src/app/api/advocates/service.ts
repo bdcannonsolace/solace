@@ -1,20 +1,31 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { asc } from 'drizzle-orm';
-import appDb from '../../../db';
+import { and, asc, SQL } from 'drizzle-orm';
 import { advocates } from '../../../db/schema';
 import { withPagination, DEFAULT_PAGE_SIZE } from '../../../lib/pagination';
+import type { ListAdvocateFilters } from './types';
+import { buildAllConditions } from './conditions';
 
 // This is the Advocate Service. It contains the business logic for the Advocate API.
 export async function listAdvocates(
   page: number = 1,
   pageSize: number = DEFAULT_PAGE_SIZE,
-  dbLike: PostgresJsDatabase = appDb,
+  dbLike: PostgresJsDatabase,
+  filters?: ListAdvocateFilters,
 ) {
-  const query = withPagination(
-    dbLike.select().from(advocates).orderBy(asc(advocates.id)).$dynamic(),
-    page,
-    pageSize,
-  );
+
+  let baseQuery = dbLike
+    .select()
+    .from(advocates)
+    .orderBy(asc(advocates.id))
+    .$dynamic();
+
+  const conditions = buildAllConditions(filters);
+
+  if (conditions.length > 0) {
+    baseQuery = baseQuery.where(and(...(conditions.filter(Boolean) as SQL[])));
+  }
+
+  const query = withPagination(baseQuery, page, pageSize);
 
   const rows = await query;
   

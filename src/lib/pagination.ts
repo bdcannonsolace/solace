@@ -3,7 +3,7 @@ import { PgSelect } from "drizzle-orm/pg-core";
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
-function parsePositiveIntOrDefault(
+export function parsePositiveIntOrDefault(
   value: string | null | undefined,
   defaultValue: number,
 ): number {

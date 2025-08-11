@@ -11,18 +11,19 @@
     "start": "next start",
     "lint": "next lint",
     "generate": "drizzle-kit generate",
-    "migrate:up": "node ./src/db/migrate.js",
-    "seed": "tsx ./src/db/seed/index.ts",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "migrate:up": "drizzle-kit migrate",
+    "seed": "NODE_OPTIONS='-r dotenv/config' tsx ./src/db/seed/index.ts",
+    "test": "DOTENV_CONFIG_PATH=.env.test NODE_OPTIONS='-r dotenv/config' vitest",
+    "test:run": "DOTENV_CONFIG_PATH=.env.test NODE_OPTIONS='-r dotenv/config' vitest run",
+    "test:coverage": "DOTENV_CONFIG_PATH=.env.test NODE_OPTIONS='-r dotenv/config' vitest run --coverage"
   },
   "dependencies": {
-    "drizzle-orm": "^0.32.1",
+    "drizzle-orm": "^0.44.4",
     "next": "^14.2.19",
     "postgres": "^3.4.4",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.12",
@@ -30,7 +31,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitest/coverage-v8": "^3.2.4",
     "dotenv": "^17.2.1",
-    "drizzle-kit": "^0.23.0",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.40",
