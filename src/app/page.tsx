@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, FormEvent } from "react";
-import type { advocates } from "../db/schema";
+import { useMemo, useState, FormEvent } from "react";
 import type { ListAdvocateFilters } from "./api/advocates/types";
-
-type Advocate = typeof advocates.$inferSelect;
+import { useAdvocates } from "./hooks/useAdvocates";
 
 type FilterFormState = {
   firstName: string;
@@ -29,76 +27,17 @@ const initialFormState: FilterFormState = {
 };
 
 export default function Home() {
-  const [data, setData] = useState<Advocate[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
-
-  const [form, setForm] = useState<FilterFormState>(initialFormState);
   const [appliedFilters, setAppliedFilters] = useState<ListAdvocateFilters>({});
 
-  const abortRef = useRef<AbortController | null>(null);
+  const { data, loading, error, hasNextPage } = useAdvocates({
+    page,
+    pageSize,
+    filters: appliedFilters,
+  });
 
-  const buildQueryParams = useCallback(() => {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("pageSize", String(pageSize));
-
-    if (appliedFilters.firstName) params.set("firstName", appliedFilters.firstName);
-    if (appliedFilters.lastName) params.set("lastName", appliedFilters.lastName);
-    if (appliedFilters.city) params.set("city", appliedFilters.city);
-    if (appliedFilters.degree) params.set("degree", appliedFilters.degree);
-
-    if (appliedFilters.specialties && appliedFilters.specialties.length > 0) {
-      params.set("specialties", appliedFilters.specialties.join(","));
-    }
-
-    if (typeof appliedFilters.yearsOfExperience === "number") {
-      params.set("yearsOfExperience", String(appliedFilters.yearsOfExperience));
-    }
-    if (typeof appliedFilters.minYearsOfExperience === "number") {
-      params.set("minYearsOfExperience", String(appliedFilters.minYearsOfExperience));
-    }
-    if (typeof appliedFilters.maxYearsOfExperience === "number") {
-      params.set("maxYearsOfExperience", String(appliedFilters.maxYearsOfExperience));
-    }
-
-    return params;
-  }, [appliedFilters, page, pageSize]);
-
-  const fetchAdvocates = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const params = buildQueryParams();
-      const res = await fetch(`/api/advocates?${params.toString()}`, {
-        signal: controller.signal,
-      });
-      if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
-      }
-      const body = (await res.json()) as { data: Advocate[] };
-      setData(body.data);
-      setHasNextPage(body.data.length >= pageSize);
-    } catch (err: unknown) {
-      if ((err as any)?.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Failed to load advocates");
-    } finally {
-      setLoading(false);
-    }
-  }, [buildQueryParams, pageSize]);
-
-  useEffect(() => {
-    fetchAdvocates();
-  }, [fetchAdvocates]);
+  const [form, setForm] = useState<FilterFormState>(initialFormState);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
